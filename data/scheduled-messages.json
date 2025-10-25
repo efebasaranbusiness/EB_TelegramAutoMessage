@@ -1,0 +1,19 @@
+[
+  {
+    "id": "1761432570909",
+    "chatId": 4529820494,
+    "message": "Test Channel WEeb auto croın",
+    "cronExpression": "50 01 * * *",
+    "isActive": true,
+    "createdAt": "2025-10-25T22:49:30.909Z"
+  },
+  {
+    "id": "1761432570923",
+    "chatId": 4209084301,
+    "message": "Test Channel WEeb auto croın",
+    "cronExpression": "50 01 * * *",
+    "isActive": true,
+    "createdAt": "2025-10-25T22:49:30.923Z",
+    "lastSent": "2025-10-25T22:50:00.317Z"
+  }
+]
