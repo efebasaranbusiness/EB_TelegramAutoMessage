@@ -252,6 +252,7 @@ class TelegramService {
         });
         console.log('Telegram client started successfully');
         console.log('Client connected:', this.client.connected);
+        console.log('Client ready:', this.client.ready);
       }
 
       return true;
@@ -542,11 +543,15 @@ class TelegramService {
   }
 
   async getChats(): Promise<TelegramChat[]> {
+    console.log('getChats called');
+    console.log('Client exists:', !!this.client);
+    
     if (!this.client) {
       console.error('Telegram client not initialized');
       return [];
     }
 
+    console.log('Client connected:', this.client.connected);
     if (!this.client.connected) {
       console.error('Telegram client not connected');
       return [];
