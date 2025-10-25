@@ -13,7 +13,6 @@ export default function EnvironmentConfig() {
     apiHash: ''
   });
   const [isConfigured, setIsConfigured] = useState(false);
-  const [showConfig, setShowConfig] = useState(false);
 
   useEffect(() => {
     // Check if configuration exists in localStorage
@@ -40,21 +39,11 @@ export default function EnvironmentConfig() {
     // Save to localStorage
     localStorage.setItem('telegram_config', JSON.stringify(config));
     setIsConfigured(true);
-    setShowConfig(false);
     
     // Reload the page to apply new configuration
     window.location.reload();
   };
 
-  const handleClear = () => {
-    localStorage.removeItem('telegram_config');
-    localStorage.removeItem('telegram_session');
-    localStorage.removeItem('telegram_user');
-    setConfig({ apiId: '', apiHash: '' });
-    setIsConfigured(false);
-    setShowConfig(false);
-    window.location.reload();
-  };
 
   if (!isConfigured) {
     return (
@@ -173,42 +162,5 @@ export default function EnvironmentConfig() {
     );
   }
 
-  return (
-    <div className="fixed top-4 right-4 z-50">
-      <button
-        onClick={() => setShowConfig(!showConfig)}
-        className="bg-gray-800/80 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700/80 transition-all duration-200 border border-gray-600/50 shadow-lg"
-      >
-        <div className="flex items-center space-x-2">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span>Yapılandırma</span>
-        </div>
-      </button>
-
-      {showConfig && (
-        <div className="absolute top-12 right-0 bg-gray-800/90 backdrop-blur-sm border border-gray-600/50 rounded-lg shadow-xl p-4 w-80">
-          <h3 className="font-medium text-white mb-3">API Yapılandırması</h3>
-          <div className="space-y-2 text-sm">
-            <div>
-              <span className="text-gray-300">API ID:</span>
-              <span className="ml-2 font-mono text-white">{config.apiId}</span>
-            </div>
-            <div>
-              <span className="text-gray-300">API Hash:</span>
-              <span className="ml-2 font-mono text-white">{config.apiHash.substring(0, 8)}...</span>
-            </div>
-          </div>
-          <button
-            onClick={handleClear}
-            className="mt-3 w-full bg-red-600/80 text-white py-2 px-3 rounded text-sm hover:bg-red-700/80 transition-all duration-200"
-          >
-            Yapılandırmayı Temizle
-          </button>
-        </div>
-      )}
-    </div>
-  );
+  return null;
 }
