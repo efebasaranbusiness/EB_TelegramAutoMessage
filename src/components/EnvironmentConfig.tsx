@@ -7,7 +7,11 @@ interface EnvironmentConfig {
   apiHash: string;
 }
 
-export default function EnvironmentConfig() {
+interface EnvironmentConfigProps {
+  onConfigured: () => void;
+}
+
+export default function EnvironmentConfig({ onConfigured }: EnvironmentConfigProps) {
   const [config, setConfig] = useState<EnvironmentConfig>({
     apiId: '',
     apiHash: ''
@@ -40,8 +44,8 @@ export default function EnvironmentConfig() {
     localStorage.setItem('telegram_config', JSON.stringify(config));
     setIsConfigured(true);
     
-    // Reload the page to apply new configuration
-    window.location.reload();
+    // Notify parent component that configuration is complete
+    onConfigured();
   };
 
 

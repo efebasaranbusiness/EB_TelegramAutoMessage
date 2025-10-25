@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import LoginForm from '@/components/LoginForm';
 import Dashboard from '@/components/Dashboard';
+import EnvironmentConfig from '@/components/EnvironmentConfig';
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -65,8 +66,12 @@ export default function Home() {
     localStorage.removeItem('telegram_user');
   };
 
+  const handleConfigurationComplete = () => {
+    setIsConfigured(true);
+  };
+
   if (!isConfigured) {
-    return null; // EnvironmentConfig component will handle the configuration UI
+    return <EnvironmentConfig onConfigured={handleConfigurationComplete} />;
   }
 
   if (!isAuthenticated) {
