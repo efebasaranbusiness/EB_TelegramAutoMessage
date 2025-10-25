@@ -25,8 +25,10 @@ export default function EnvironmentConfig({ onConfigured }: EnvironmentConfigPro
       const parsedConfig = JSON.parse(savedConfig);
       setConfig(parsedConfig);
       setIsConfigured(true);
+      // If config exists, notify parent immediately
+      onConfigured();
     }
-  }, []);
+  }, [onConfigured]);
 
   const handleSave = () => {
     if (!config.apiId || !config.apiHash) {
