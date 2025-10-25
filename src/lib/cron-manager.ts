@@ -114,10 +114,14 @@ class CronManager {
       
       if (!config || !sessionString) {
         console.error('Configuration or session not found for cron job');
+        console.error('Config exists:', !!config);
+        console.error('Session exists:', !!sessionString);
         return;
       }
 
       const { apiId, apiHash } = JSON.parse(config);
+      console.log('Cron job - API ID:', apiId);
+      console.log('Cron job - Session string length:', sessionString.length);
 
       const response = await fetch('/api/telegram/send-message', {
         method: 'POST',

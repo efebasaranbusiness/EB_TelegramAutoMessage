@@ -9,11 +9,14 @@ export async function POST(request: NextRequest) {
     const apiHash = request.headers.get('x-api-hash');
     
     if (!sessionString) {
+      console.error('Session string is missing in request headers');
       return NextResponse.json(
         { error: 'Session string is required' },
         { status: 401 }
       );
     }
+
+    console.log('Received session string length:', sessionString.length);
 
     if (!apiId || !apiHash) {
       return NextResponse.json(

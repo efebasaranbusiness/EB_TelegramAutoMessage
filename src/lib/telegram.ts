@@ -216,6 +216,12 @@ class TelegramService {
 
   async initialize(sessionString?: string): Promise<boolean> {
     try {
+      console.log('Initializing Telegram client...');
+      console.log('Session string provided:', !!sessionString);
+      console.log('Session string length:', sessionString?.length || 0);
+      console.log('API ID:', this.apiId);
+      console.log('API Hash:', this.apiHash ? '***' : 'missing');
+      
       const stringSession = new StringSession(sessionString || '');
       
       this.client = new TelegramClient(
@@ -229,6 +235,7 @@ class TelegramService {
 
       // Only start if we have a session string (already authenticated)
       if (sessionString) {
+        console.log('Starting Telegram client with session...');
         await this.client.start({
           phoneNumber: async () => {
             throw new Error('Phone number required for authentication');
@@ -243,6 +250,7 @@ class TelegramService {
             console.error('Telegram client error:', err);
           },
         });
+        console.log('Telegram client started successfully');
       }
 
       return true;
