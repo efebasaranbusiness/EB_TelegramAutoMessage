@@ -54,7 +54,7 @@ class CronManager {
     }
   }
 
-  private parseCronExpression(cronExpression: string): { interval: number; unit: 'minutes' | 'hours' | 'days' } | null {
+  private parseCronExpression(cronExpression: string): { interval: number; unit: 'minutes' | 'hours' | 'days' | 'daily' } | null {
     // Simple cron parser for common patterns
     const parts = cronExpression.split(' ');
     
@@ -81,12 +81,17 @@ class CronManager {
       if (minute === '0' && hour === '0' && day !== '*' && month === '*' && dayOfWeek === '*') {
         return { interval: parseInt(day) || 1, unit: 'days' };
       }
+
+      // Handle daily at specific time (e.g., "47 02 * * *" = daily at 02:47)
+      if (minute !== '*' && hour !== '*' && day === '*' && month === '*' && dayOfWeek === '*') {
+        return { interval: 1, unit: 'daily' };
+      }
     }
     
     return null;
   }
 
-  private getIntervalMs(interval: number, unit: 'minutes' | 'hours' | 'days'): number {
+  private getIntervalMs(interval: number, unit: 'minutes' | 'hours' | 'days' | 'daily'): number {
     switch (unit) {
       case 'minutes':
         return interval * 60 * 1000;
@@ -94,8 +99,50 @@ class CronManager {
         return interval * 60 * 60 * 1000;
       case 'days':
         return interval * 24 * 60 * 60 * 1000;
+      case 'daily':
+        return 24 * 60 * 60 * 1000; // 24 hours
       default:
         return 60 * 1000; // Default to 1 minute
+    }
+  }
+
+  private async sendScheduledMessage(scheduledMessage: ScheduledMessage): Promise<void> {
+    try {
+      // Get API credentials from localStorage
+      const config = localStorage.getItem('telegram_config');
+      const sessionString = localStorage.getItem('telegram_session');
+      
+      if (!config || !sessionString) {
+        console.error('Configuration or session not found for cron job');
+        return;
+      }
+
+      const { apiId, apiHash } = JSON.parse(config);
+
+      const response = await fetch('/api/telegram/send-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-session-string': sessionString,
+          'x-api-id': apiId,
+          'x-api-hash': apiHash,
+        },
+        body: JSON.stringify({
+          chatId: scheduledMessage.chatId,
+          message: scheduledMessage.message,
+        }),
+      });
+
+      if (response.ok) {
+        // Update last sent time
+        scheduledMessage.lastSent = new Date().toISOString();
+        this.saveScheduledMessages();
+        console.log('Scheduled message sent successfully');
+      } else {
+        console.error('Failed to send scheduled message:', await response.text());
+      }
+    } catch (error) {
+      console.error('Failed to send scheduled message:', error);
     }
   }
 
@@ -113,48 +160,35 @@ class CronManager {
         this.stopMessage(scheduledMessage.id);
       }
 
-      // Create interval
-      const intervalMs = this.getIntervalMs(parsed.interval, parsed.unit);
+      // Create interval based on type
+      let intervalId: number;
       
-      const intervalId = window.setInterval(async () => {
-        try {
-          // Get API credentials from localStorage
-          const config = localStorage.getItem('telegram_config');
-          const sessionString = localStorage.getItem('telegram_session');
+      if (parsed.unit === 'daily') {
+        // For daily messages, check every minute if it's time to send
+        intervalId = window.setInterval(async () => {
+          const now = new Date();
+          const parts = scheduledMessage.cronExpression.split(' ');
+          const targetMinute = parseInt(parts[0]);
+          const targetHour = parseInt(parts[1]);
           
-          if (!config || !sessionString) {
-            console.error('Configuration or session not found for cron job');
-            return;
+          // Check if current time matches target time
+          if (now.getMinutes() === targetMinute && now.getHours() === targetHour) {
+            // Check if we already sent today
+            const today = now.toDateString();
+            const lastSentDate = scheduledMessage.lastSent ? new Date(scheduledMessage.lastSent).toDateString() : null;
+            
+            if (lastSentDate !== today) {
+              await this.sendScheduledMessage(scheduledMessage);
+            }
           }
-
-          const { apiId, apiHash } = JSON.parse(config);
-
-          const response = await fetch('/api/telegram/send-message', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-session-string': sessionString,
-              'x-api-id': apiId,
-              'x-api-hash': apiHash,
-            },
-            body: JSON.stringify({
-              chatId: scheduledMessage.chatId,
-              message: scheduledMessage.message,
-            }),
-          });
-
-          if (response.ok) {
-            // Update last sent time
-            scheduledMessage.lastSent = new Date().toISOString();
-            this.saveScheduledMessages();
-            console.log('Scheduled message sent successfully');
-          } else {
-            console.error('Failed to send scheduled message:', await response.text());
-          }
-        } catch (error) {
-          console.error('Failed to send scheduled message:', error);
-        }
-      }, intervalMs);
+        }, 60000); // Check every minute
+      } else {
+        // For other types, use regular interval
+        const intervalMs = this.getIntervalMs(parsed.interval, parsed.unit);
+        intervalId = window.setInterval(async () => {
+          await this.sendScheduledMessage(scheduledMessage);
+        }, intervalMs);
+      }
 
       const job: CronJob = {
         id: scheduledMessage.id,
