@@ -116,10 +116,27 @@ class CronManager {
         console.error('Configuration or session not found for cron job');
         console.error('Config exists:', !!config);
         console.error('Session exists:', !!sessionString);
+        console.error('Available localStorage keys:', Object.keys(localStorage));
         return;
       }
 
-      const { apiId, apiHash } = JSON.parse(config);
+      let apiId, apiHash;
+      try {
+        const parsedConfig = JSON.parse(config);
+        apiId = parsedConfig.apiId;
+        apiHash = parsedConfig.apiHash;
+      } catch (error) {
+        console.error('Failed to parse config:', error);
+        return;
+      }
+
+      if (!apiId || !apiHash) {
+        console.error('API credentials missing from config');
+        console.error('API ID:', apiId);
+        console.error('API Hash:', apiHash ? '***' : 'missing');
+        return;
+      }
+
       console.log('Cron job - API ID:', apiId);
       console.log('Cron job - Session string length:', sessionString.length);
 
