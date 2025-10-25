@@ -369,10 +369,7 @@ class TelegramService {
       }
 
       // Try to sign in with phone code only
-      const result = await this.client.signInUser({
-        apiId: this.apiId,
-        apiHash: this.apiHash,
-      }, {
+      const result = await this.client.signIn({
         phoneNumber: async () => phoneNumber,
         phoneCode: async () => phoneCode,
         onError: (err) => {
@@ -472,10 +469,7 @@ class TelegramService {
       await client.connect();
 
       // Complete the sign-in with password
-      await client.signInUser({
-        apiId: this.apiId,
-        apiHash: this.apiHash,
-      }, {
+      await client.signIn({
         phoneNumber: async () => phoneNumber,
         phoneCode: async () => phoneCode,
         password: async () => password,
