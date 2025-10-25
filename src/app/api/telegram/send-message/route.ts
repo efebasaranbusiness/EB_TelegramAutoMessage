@@ -46,6 +46,9 @@ export async function POST(request: NextRequest) {
     if (success) {
       return NextResponse.json({ success: true });
     } else {
+      console.error('Telegram sendMessage returned false');
+      console.error('Chat ID:', chatId);
+      console.error('Message:', message);
       return NextResponse.json(
         { error: 'Failed to send message' },
         { status: 500 }

@@ -591,14 +591,20 @@ class TelegramService {
 
   async sendMessage(chatId: number, message: string): Promise<boolean> {
     if (!this.client || !this.client.connected) {
+      console.error('Telegram client not connected');
       return false;
     }
 
     try {
+      console.log('Sending message to chat ID:', chatId);
+      console.log('Message content:', message);
       await this.client.sendMessage(chatId, { message });
+      console.log('Message sent successfully');
       return true;
     } catch (error) {
       console.error('Failed to send message:', error);
+      console.error('Chat ID:', chatId);
+      console.error('Message:', message);
       return false;
     }
   }

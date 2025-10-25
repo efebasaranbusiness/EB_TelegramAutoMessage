@@ -139,7 +139,11 @@ class CronManager {
         this.saveScheduledMessages();
         console.log('Scheduled message sent successfully');
       } else {
-        console.error('Failed to send scheduled message:', await response.text());
+        const errorText = await response.text();
+        console.error('Failed to send scheduled message:', errorText);
+        console.error('Response status:', response.status);
+        console.error('Chat ID:', scheduledMessage.chatId);
+        console.error('Message:', scheduledMessage.message);
       }
     } catch (error) {
       console.error('Failed to send scheduled message:', error);
