@@ -25,10 +25,8 @@ export default function EnvironmentConfig({ onConfigured }: EnvironmentConfigPro
       const parsedConfig = JSON.parse(savedConfig);
       setConfig(parsedConfig);
       setIsConfigured(true);
-      // If config exists, notify parent immediately
-      onConfigured();
     }
-  }, [onConfigured]);
+  }, []);
 
   const handleSave = () => {
     if (!config.apiId || !config.apiHash) {
@@ -120,7 +118,7 @@ export default function EnvironmentConfig({ onConfigured }: EnvironmentConfigPro
                 </div>
               </div>
 
-              <div>
+              <div className="space-y-3">
                 <button
                   type="submit"
                   className="group relative w-full flex justify-center items-center py-3 px-6 border border-white text-sm font-semibold rounded-lg text-white bg-black hover:bg-white hover:text-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white transition-all duration-200"
@@ -132,6 +130,21 @@ export default function EnvironmentConfig({ onConfigured }: EnvironmentConfigPro
                     <span>Yapılandırmayı Kaydet</span>
                   </div>
                 </button>
+                
+                {isConfigured && (
+                  <button
+                    type="button"
+                    onClick={onConfigured}
+                    className="group relative w-full flex justify-center items-center py-3 px-6 border border-green-500 text-sm font-semibold rounded-lg text-green-500 bg-transparent hover:bg-green-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                      <span>Mevcut Yapılandırma ile Devam Et</span>
+                    </div>
+                  </button>
+                )}
               </div>
             </form>
 
