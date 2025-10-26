@@ -622,24 +622,30 @@ class TelegramService {
       let result;
       
       try {
-        // First try: Direct chat ID
+        // First try: Direct chat ID as number
         result = await this.client.sendMessage(chatId, { message });
       } catch (error1) {
-        console.log('Direct chat ID failed, trying with InputPeerUser...');
+        console.log('Direct chat ID failed, trying as string...');
         try {
-          // Second try: InputPeerUser
-          const { InputPeerUser } = await import('telegram');
-          const peer = new InputPeerUser({ userId: chatId, accessHash: 0n });
-          result = await this.client.sendMessage(peer, { message });
+          // Second try: Chat ID as string
+          result = await this.client.sendMessage(chatId.toString(), { message });
         } catch (error2) {
-          console.log('InputPeerUser failed, trying to find in dialogs...');
-          // Third try: Find in dialogs
-          const dialogs = await this.client.getDialogs();
-          const dialog = dialogs.find(d => d.id.toString() === chatId.toString());
-          if (dialog) {
-            result = await this.client.sendMessage(dialog.entity, { message });
-          } else {
-            throw new Error('Chat not found in dialogs');
+          console.log('String chat ID failed, trying with InputPeerUser...');
+          try {
+            // Third try: InputPeerUser
+            const { InputPeerUser } = await import('telegram');
+            const peer = new InputPeerUser({ userId: chatId, accessHash: 0n });
+            result = await this.client.sendMessage(peer, { message });
+          } catch (error3) {
+            console.log('InputPeerUser failed, trying to find in dialogs...');
+            // Fourth try: Find in dialogs
+            const dialogs = await this.client.getDialogs();
+            const dialog = dialogs.find(d => d.id.toString() === chatId.toString());
+            if (dialog) {
+              result = await this.client.sendMessage(dialog.entity, { message });
+            } else {
+              throw new Error('Chat not found in dialogs');
+            }
           }
         }
       }
