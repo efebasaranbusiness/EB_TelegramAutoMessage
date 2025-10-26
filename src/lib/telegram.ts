@@ -617,7 +617,12 @@ class TelegramService {
     try {
       console.log('Sending message to chat ID:', chatId);
       console.log('Message content:', message);
-      await this.client.sendMessage(chatId, { message });
+      
+      // Convert chatId to proper format
+      const entity = await this.client.getEntity(chatId);
+      console.log('Found entity:', entity);
+      
+      await this.client.sendMessage(entity, { message });
       console.log('Message sent successfully');
       return true;
     } catch (error) {
