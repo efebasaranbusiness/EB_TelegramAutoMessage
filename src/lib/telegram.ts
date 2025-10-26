@@ -618,11 +618,32 @@ class TelegramService {
       console.log('Sending message to chat ID:', chatId);
       console.log('Message content:', message);
       
-      // Convert chatId to proper format
-      const entity = await this.client.getEntity(chatId);
-      console.log('Found entity:', entity);
+      // Try different approaches to send message
+      let result;
       
-      await this.client.sendMessage(entity, { message });
+      try {
+        // First try: Direct chat ID
+        result = await this.client.sendMessage(chatId, { message });
+      } catch (error1) {
+        console.log('Direct chat ID failed, trying with InputPeerUser...');
+        try {
+          // Second try: InputPeerUser
+          const { InputPeerUser } = await import('telegram');
+          const peer = new InputPeerUser({ userId: chatId, accessHash: 0n });
+          result = await this.client.sendMessage(peer, { message });
+        } catch (error2) {
+          console.log('InputPeerUser failed, trying to find in dialogs...');
+          // Third try: Find in dialogs
+          const dialogs = await this.client.getDialogs();
+          const dialog = dialogs.find(d => d.id.toString() === chatId.toString());
+          if (dialog) {
+            result = await this.client.sendMessage(dialog.entity, { message });
+          } else {
+            throw new Error('Chat not found in dialogs');
+          }
+        }
+      }
+      
       console.log('Message sent successfully');
       return true;
     } catch (error) {
